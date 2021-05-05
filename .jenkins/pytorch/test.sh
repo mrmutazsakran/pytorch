@@ -153,6 +153,16 @@ test_python() {
   assert_git_not_dirty
 }
 
+test_python_gloo_with_tls() {
+  source ./create_test_cert.sh
+  time python test/run_test.py --include test_c10d_gloo --verbose --determine-from="$DETERMINE_FROM"
+  unset GLOO_DEVICE_TRANSPORT
+  unset GLOO_DEVICE_TRANSPORT_TCP_TLS_PKEY
+  unset GLOO_DEVICE_TRANSPORT_TCP_TLS_CERT
+  unset GLOO_DEVICE_TRANSPORT_TCP_TLS_CA_FILE
+  assert_git_not_dirty
+}
+
 
 test_aten() {
   # Test ATen
@@ -478,6 +488,9 @@ else
   test_distributed
   test_benchmarks
   test_rpc
+  if [[ "${BUILD_ENVIRONMENT}" == pytorch_linux_xenial_py3_6_gcc7_test || "${BUILD_ENVIRONMENT}" == pytorch_linux_xenial_py3_6_gcc5_4_test ]]; then
+    test_python_gloo_with_tls
+  fi
 fi
 
 if [[ "$BUILD_ENVIRONMENT" == *coverage* ]]; then
